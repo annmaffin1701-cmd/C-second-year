@@ -1,0 +1,49 @@
+#include <iostream>
+struct Prices
+{
+    int drink;  
+    int first;  
+    int second;  
+};
+
+struct Choices
+{
+    int drink;  
+    int first;   
+    int second;  
+};
+
+
+//расчeт стоимости заказа
+int customerTotal(const Prices& prices, const Choices& choices)
+{
+    int total = choices.drink * prices.drink
+              + choices.first * prices.first
+              + choices.second * prices.second;
+
+    return total; 
+}
+
+int main()
+{
+    Prices prices = { 10, 20, 30 };
+    //клиент 1
+    {
+        Choices choices = { 100, 0, 250 };
+        // 100 * 10 + 0 * 20 + 250 * 30 = 1000 + 0 + 7500 = 8500
+        int total = customerTotal(prices, choices);
+        std::cout << "Стоимость заказа клиента 1: " << total << '\n';
+    } 
+
+    //клиент 2
+    {
+        Choices choices = { 0, 300, 0 };
+
+        // 0 * 10 + 300 * 20 + 0 * 30 = 6000
+        int total = customerTotal(prices, choices);
+
+        std::cout << "Стоимость заказа клиента 2: " << total << '\n';
+    }
+
+    return 0; 
+}
