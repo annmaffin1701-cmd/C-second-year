@@ -1,0 +1,70 @@
+//преподователь дает задание студенту
+//студент выполняет задание и ответ дает преподавателю
+//препод дает оценку от 1 до 10. сделать как сущности, задание пример на сложение
+//препод будет оценивать на сколько ответ не совпадает X+Y.
+//если ответ не равен,на 2,то оценка 8.
+//студенту задать на сколько о будет ошибаться в ответ5.
+
+#include <algorithm>
+#include <iostream>
+
+struct Student
+{
+int vicisleati;
+int datiOtvet;
+int osibka;
+};
+struct Prepod
+{
+    int x;
+    int y;
+    int postavitiOcencu;
+    int pravilniiOtvet;
+};
+int napisatiZadanie(Prepod*prepod, int x, int y)
+{
+    prepod->x = x;
+    prepod->y = y;
+
+    
+    prepod->pravilniiOtvet = x + y;
+}
+
+void resheniePrimera(Student* student, Prepod* prepod)
+{
+    student-> datiOtvet = prepod->pravilniiOtvet - student->datiOtvet;
+}
+
+void postavitiOcencu(Prepod*prepod,Student* student)
+{
+int raznicaOtveta = std::abs
+prepod->pravilniiOtvet - student->datiOtvet;
+prepod->postavitiOcencu = std::max(1, 10 - raznicaOtveta);
+}
+
+int main()
+{
+ Prepod prepod{}
+ Student student{
+.otvet = 0,
+.osibka = 2,
+};
+
+datiZadanie(&prepod,5,5);
+
+resheniePrimera(&student, &prepod);
+postavitiOcencu(&prepod, &student);
+std::cout << "Primer: "
+<< prepod.x << " + " << prepod.y
+<< " = ?" << std::endl;
+std::cout << "Pravilniy otvet: "
+<< prepod.pravilniyOtvet << std::endl;
+std::cout << "Otvet studenta: "
+<< student.otvet << std::endl;
+std::cout << "Oshibka: "
+<< std::abs(prepod.pravilniyOtvet - student.otvet)
+<< std::endl;
+std::cout << "Ocenka: "
+<< prepod.ocenka << std::endl;
+return 0;
+
