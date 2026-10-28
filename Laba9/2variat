@@ -1,70 +1,135 @@
-//преподователь дает задание студенту
-//студент выполняет задание и ответ дает преподавателю
-//препод дает оценку от 1 до 10. сделать как сущности, задание пример на сложение
-//препод будет оценивать на сколько ответ не совпадает X+Y.
-//если ответ не равен,на 2,то оценка 8.
-//студенту задать на сколько о будет ошибаться в ответ5.
-
 #include <algorithm>
 #include <iostream>
+#include <cstdlib>
 
-struct Student
-{
-int vicisleati;
-int datiOtvet;
-int osibka;
-};
-struct Prepod
+struct Zadanie
 {
     int x;
     int y;
-    int postavitiOcencu;
-    int pravilniiOtvet;
 };
-int napisatiZadanie(Prepod*prepod, int x, int y)
-{
-    prepod->x = x;
-    prepod->y = y;
 
-    
-    prepod->pravilniiOtvet = x + y;
+struct Student
+{
+    int otvet;
+    int osibka;
+};
+
+struct Prepod
+{
+    Zadanie zadanie;
+    int pravilniiOtvet;
+    int ocenka;
+};
+
+void datiZadanie(Prepod* prepod, Zadanie zadanie)
+{
+    prepod->zadanie = zadanie;
+
+    prepod->pravilniiOtvet =
+        zadanie.x + zadanie.y;
 }
 
-void resheniePrimera(Student* student, Prepod* prepod)
+void reshitZadanie(Student* student, Prepod* prepod)
 {
-    student-> datiOtvet = prepod->pravilniiOtvet - student->datiOtvet;
+    student->otvet =
+        prepod->pravilniiOtvet + student->osibka;
 }
 
-void postavitiOcencu(Prepod*prepod,Student* student)
+void postavitiOcencu(Prepod* prepod, Student* student)
 {
-int raznicaOtveta = std::abs
-prepod->pravilniiOtvet - student->datiOtvet;
-prepod->postavitiOcencu = std::max(1, 10 - raznicaOtveta);
+    int raznicaOtveta = std::abs(
+        prepod->pravilniiOtvet - student->otvet
+    );
+
+    prepod->ocenka = std::max(1, 10 - raznicaOtveta);
 }
 
 int main()
 {
- Prepod prepod{}
- Student student{
-.otvet = 0,
-.osibka = 2,
-};
+    Zadanie spisokZadanii[] =
+    {
+        {2, 3},
+        {5, 5},
+        {7, 4},
+        {10, 8},
+        {15, 6}
+    };
 
-datiZadanie(&prepod,5,5);
+    int kolichestvoZadanii =
+        sizeof(spisokZadanii) / sizeof(spisokZadanii[0]);
 
-resheniePrimera(&student, &prepod);
-postavitiOcencu(&prepod, &student);
-std::cout << "Primer: "
-<< prepod.x << " + " << prepod.y
-<< " = ?" << std::endl;
-std::cout << "Pravilniy otvet: "
-<< prepod.pravilniyOtvet << std::endl;
-std::cout << "Otvet studenta: "
-<< student.otvet << std::endl;
-std::cout << "Oshibka: "
-<< std::abs(prepod.pravilniyOtvet - student.otvet)
-<< std::endl;
-std::cout << "Ocenka: "
-<< prepod.ocenka << std::endl;
-return 0;
+    std::cout << "Spisok zadanii:\n";
 
+    for (int i = 0; i < kolichestvoZadanii; i++)
+    {
+        std::cout
+            << i + 1 << ". "
+            << spisokZadanii[i].x
+            << " + "
+            << spisokZadanii[i].y
+            << '\n';
+    }
+
+    int nomerZadaniya;
+
+    std::cout << "\nPrepod vyberaet zadanie (1-"
+              << kolichestvoZadanii << "): ";
+    std::cin >> nomerZadaniya;
+
+    if (nomerZadaniya < 1 ||
+        nomerZadaniya > kolichestvoZadanii)
+    {
+        std::cout << "Neverniy nomer zadaniya!\n";
+        return 1;
+    }
+
+    Prepod prepod{};
+
+    Student student{};
+
+    datiZadanie(
+        &prepod,
+        spisokZadanii[nomerZadaniya - 1]
+    );
+
+    std::cout << "\nPrepod dal zadanie: "
+              << prepod.zadanie.x
+              << " + "
+              << prepod.zadanie.y
+              << " = ?\n";
+
+    std::cout << "Na skolko student oshibetsya v otvete: ";
+    std::cin >> student.osibka;
+
+    reshitZadanie(&student, &prepod);
+
+    postavitiOcencu(&prepod, &student);
+
+    std::cout << "\n--- Rezultat ---\n";
+
+    std::cout << "Primer: "
+              << prepod.zadanie.x
+              << " + "
+              << prepod.zadanie.y
+              << '\n';
+
+    std::cout << "Pravilniy otvet: "
+              << prepod.pravilniiOtvet
+              << '\n';
+
+    std::cout << "Otvet studenta: "
+              << student.otvet
+              << '\n';
+
+    std::cout << "Raznica otvetov: "
+              << std::abs(
+                  prepod.pravilniiOtvet - student.otvet
+              )
+              << '\n';
+
+    std::cout << "Ocenka: "
+              << prepod.ocenka
+              << '\n';
+
+    return 0;
+}
