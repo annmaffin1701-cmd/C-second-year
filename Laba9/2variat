@@ -1,3 +1,9 @@
+//преподователь дает задание студенту
+//студент выполняет задание и ответ дает преподавателю
+//препод дает оценку от 1 до 10. сделать как сущности, задание пример на сложение
+//препод будет оценивать на сколько ответ не совпадает X+Y.
+//если ответ не равен,на 2,то оценка 8.
+//студенту задать на сколько о будет ошибаться в ответ 5.
 #include <algorithm>
 #include <iostream>
 #include <cstdlib>
@@ -29,10 +35,16 @@ void datiZadanie(Prepod* prepod, Zadanie zadanie)
         zadanie.x + zadanie.y;
 }
 
-void reshitZadanie(Student* student, Prepod* prepod)
+int reshitZadanie(Zadanie zadanie)
 {
-    student->otvet =
-        prepod->pravilniiOtvet + student->osibka;
+    int otvet;
+
+    std::cout << "Reshi primer: "
+              << zadanie.x << " + " << zadanie.y << " = ";
+
+    std::cin >> otvet;
+
+    return otvet;
 }
 
 void postavitiOcencu(Prepod* prepod, Student* student)
@@ -101,7 +113,7 @@ int main()
     std::cout << "Na skolko student oshibetsya v otvete: ";
     std::cin >> student.osibka;
 
-    reshitZadanie(&student, &prepod);
+   student.otvet = reshitZadanie(prepod.zadanie);
 
     postavitiOcencu(&prepod, &student);
 
