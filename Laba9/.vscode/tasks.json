@@ -3,7 +3,7 @@
         {
             "type": "cppbuild",
             "label": "C/C++: gcc.exe build active file",
-            "command": "B:\\msys64\\ucrt64\\bin\\gcc.exe",
+            "command": "gcc", // Или полный путь, например: "C:\\msys64\\ucrt64\\bin\\gcc.exe"
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
