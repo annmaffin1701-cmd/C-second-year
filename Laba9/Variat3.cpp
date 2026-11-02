@@ -1,196 +1,234 @@
- //комп процессор видеокарта каждыцй может сломаться и ты несешь для починки 
- // шоп выдает талон вернуться через неделю 
- // через неделю забираешь почин комп
-
+#include <iostream>
 #include <algorithm>
 #include <array>
 #include <cstdlib>
-#include <iostream>
+#include <ctime>
+#include <string>
 
-struct Breakdown
+using namespace std;
+
+enum class ComponentState
 {
-    bool isBroken;
+    Broken,
+    Working
 };
 
-struct Pochinka
+enum class ComputerState
 {
-    bool isDone;
+    Broken,
+    Repairing,
+    Ready
 };
 
-struct Processor
+struct Component
 {
-    Breakdown breakdown;
-    Pochinka pochinka;
-};
-
-struct VideoCard
-{
-    Breakdown breakdown;
-    Pochinka pochinka;
+    string name;
+    ComponentState state;
 };
 
 struct Computer
 {
-    Breakdown breakdown;
-    Pochinka pochinka;
-    Processor processor;
-    VideoCard videoCard;
-};
-
-struct Talon
-{
-    int returnDay;
+    Component processor;
+    Component gpu;
+    ComputerState state;
 };
 
 struct Shop
 {
-    int currentDay;
-    int repairDays;
-    int readyDay;
-    bool hasComputer;
-    Computer computerInRepair;
+    Computer* computer = nullptr;
+    int currentDay = 0;
+    int repairDay = 0;
 };
 
-// Результат выдачи: получилось ли отдать компьютер и сам компьютер
-struct GiveBackResult
+// Ремонт одной детали
+void repair(Component* component)
 {
-    bool isReady;
-    Computer computer;
-};
+    if (component == nullptr)
+        return;
 
-// Чинит одну часть: если сломана, убирает поломку и отмечает починку
-void repair(Breakdown* breakdown, Pochinka* pochinka)
-{
-    if (breakdown->isBroken)
-    {
-        breakdown->isBroken = false;
-        pochinka->isDone = true;
-    }
+    component->state = ComponentState::Working;
+
+    cout << component->name << " has been repaired!" << endl;
 }
 
-void repairComputer(Computer* computer)
+// Проверка состояния компьютера
+void updateComputerState(Computer* computer)
 {
-    repair(&computer->breakdown, &computer->pochinka);
-    repair(&computer->processor.breakdown, &computer->processor.pochinka);
-    repair(&computer->videoCard.breakdown, &computer->videoCard.pochinka);
-}
+    if (computer == nullptr)
+        return;
 
-// Магазин принимает компьютер и выдает талон
-Talon acceptComputer(Shop* shop, Computer computer)
-{
-    shop->computerInRepair = computer;
-    shop->hasComputer = true;
-    shop->readyDay = shop->currentDay + shop->repairDays;
-
-    Talon talon{ .returnDay = shop->readyDay };
-    return talon;
-}
-
-// Проходит время; когда срок наступил, магазин чинит компьютер
-void passTime(Shop* shop, int days)
-{
-    shop->currentDay += days;
-
-    if (shop->hasComputer && shop->currentDay >= shop->readyDay)
+    if (computer->processor.state == ComponentState::Working &&
+        computer->gpu.state == ComponentState::Working)
     {
-        repairComputer(&shop->computerInRepair);
-    }
-}
-
-// Отдает компьютер по талону, если срок наступил
-GiveBackResult giveBackComputer(Shop* shop, Talon talon)
-{
-    if (!shop->hasComputer || shop->currentDay < talon.returnDay)
-    {
-        GiveBackResult result{ .isReady = false, .computer = {} };
-        return result;
-    }
-
-    GiveBackResult result{
-        .isReady = true,
-        .computer = shop->computerInRepair,
-    };
-    shop->hasComputer = false;
-    return result;
-}
-
-void printPart(const char* name, Breakdown breakdown, Pochinka pochinka)
-{
-    std::cout << name << ": ";
-
-    if (breakdown.isBroken)
-    {
-        std::cout << "broken";
-    }
-    else if (pochinka.isDone)
-    {
-        std::cout << "repaired";
+        computer->state = ComputerState::Ready;
     }
     else
     {
-        std::cout << "ok";
+        computer->state = ComputerState::Repairing;
     }
-
-    std::cout << '\n';
 }
 
+// Приём компьютера в мастерскую
+void acceptComputer(Shop* shop, Computer* computer)
+{
+    if (shop == nullptr || computer == nullptr)
+        return;
+
+    shop->computer = computer;
+    shop->repairDay = shop->currentDay + 7;
+
+    computer->state = ComputerState::Repairing;
+
+    cout << "Computer accepted for repair." << endl;
+    cout << "Repair ticket issued." << endl;
+    cout << "Estimated repair completion: day "
+         << shop->repairDay << endl;
+}
+
+// Передача времени
+void passTime(Shop* shop)
+{
+    if (shop == nullptr || shop->computer == nullptr)
+        return;
+
+    shop->currentDay++;
+
+    cout << "\nDay " << shop->currentDay << endl;
+
+    // Процессор ремонтируется
+    if (shop->computer->processor.state == ComponentState::Broken &&
+        shop->currentDay >= shop->repairDay)
+    {
+        repair(&shop->computer->processor);
+    }
+
+    // Видеокарта ремонтируется
+    if (shop->computer->gpu.state == ComponentState::Broken &&
+        shop->currentDay >= shop->repairDay)
+    {
+        repair(&shop->computer->gpu);
+    }
+
+    updateComputerState(shop->computer);
+
+    if (shop->computer->state == ComputerState::Ready)
+    {
+        cout << "Computer is ready!" << endl;
+    }
+}
+
+// Выдача компьютера клиенту
+void giveBackComputer(Shop* shop)
+{
+    if (shop == nullptr || shop->computer == nullptr)
+        return;
+
+    if (shop->computer->state == ComputerState::Ready)
+    {
+        cout << "\nComputer successfully returned to the client!"
+             << endl;
+
+        shop->computer = nullptr;
+    }
+    else
+    {
+        cout << "\nComputer is not ready yet. "
+             << "The client has to wait." << endl;
+    }
+}
+
+// Вывод информации о компьютере
 void printComputer(const Computer& computer)
 {
-    printPart("Computer", computer.breakdown, computer.pochinka);
-    printPart("Processor",
-              computer.processor.breakdown, computer.processor.pochinka);
-    printPart("VideoCard",
-              computer.videoCard.breakdown, computer.videoCard.pochinka);
+    cout << "\nComputer information:" << endl;
+
+    cout << "Processor: "
+         << (computer.processor.state == ComponentState::Working
+             ? "Working" : "Broken") << endl;
+
+    cout << "GPU: "
+         << (computer.gpu.state == ComponentState::Working
+             ? "Working" : "Broken") << endl;
+
+    cout << "Status: ";
+
+    switch (computer.state)
+    {
+        case ComputerState::Broken:
+            cout << "Broken";
+            break;
+
+        case ComputerState::Repairing:
+            cout << "Repairing";
+            break;
+
+        case ComputerState::Ready:
+            cout << "Ready";
+            break;
+    }
+
+    cout << endl;
 }
 
 int main()
 {
-    Computer computer{
-        .breakdown = { .isBroken = false },
-        .pochinka = { .isDone = false },
-        .processor = {
-            .breakdown = { .isBroken = true },
-            .pochinka = { .isDone = false },
-        },
-        .videoCard = {
-            .breakdown = { .isBroken = true },
-            .pochinka = { .isDone = false },
-        },
+    srand(static_cast<unsigned int>(time(nullptr)));
+
+    // Создаём компьютер с неисправными деталями
+    Computer computer
+    {
+        {"Processor", ComponentState::Broken},
+        {"GPU", ComponentState::Broken},
+        ComputerState::Broken
     };
 
-    Shop shop{
-        .currentDay = 0,
-        .repairDays = 7,
-        .readyDay = 0,
-        .hasComputer = false,
-        .computerInRepair = {},
-    };
+    // Создаём мастерскую
+    Shop shop;
 
-    std::cout << "Day " << shop.currentDay
-              << ": client brings computer\n";
+    cout << "COMPUTER REPAIR SHOP" << endl;
+
     printComputer(computer);
 
-    Talon talon{ acceptComputer(&shop, computer) };
-    std::cout << "Talon: come back on day " << talon.returnDay << "\n\n";
+    // Клиент приносит компьютер
+    cout << "\nClient brings the computer to the shop."
+         << endl;
 
-    passTime(&shop, 3);
-    std::cout << "Day " << shop.currentDay << ": client comes\n";
+    acceptComputer(&shop, &computer);
 
-    GiveBackResult result{ giveBackComputer(&shop, talon) };
-    if (!result.isReady)
+    // Случайный день возвращения клиента: от 3 до 10
+    int clientReturnDay = 3 + rand() % 8;
+
+    cout << "\nThe client plans to return on day "
+         << clientReturnDay << "." << endl;
+
+    // Каждый день проходит время
+    while (shop.computer != nullptr)
     {
-        std::cout << "Not ready yet\n\n";
+        passTime(&shop);
+
+        // Проверяем, пришёл ли клиент
+        if (shop.currentDay == clientReturnDay)
+        {
+            cout << "\nClient arrives to pick up the computer!"
+                 << endl;
+
+            giveBackComputer(&shop);
+
+            // Если компьютер ещё не готов, клиент придёт позже
+            if (shop.computer != nullptr)
+            {
+                clientReturnDay = shop.currentDay + 1 + rand() % 5;
+
+                cout << "The client will return on day "
+                     << clientReturnDay << "." << endl;
+            }
+        }
+
+        // Если клиент уже не пришёл, но компьютер готов,
+        // мастерская продолжает ждать его
     }
 
-    passTime(&shop, 4);
-    std::cout << "Day " << shop.currentDay << ": client comes\n";
-
-    result = giveBackComputer(&shop, talon);
-    if (result.isReady)
-    {
-        std::cout << "Computer is ready:\n";
-        printComputer(result.computer);
-    }
+    cout << "\nWORK COMPLETED" << endl;
 
     return 0;
 }

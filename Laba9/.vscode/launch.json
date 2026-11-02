@@ -38,7 +38,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "B:\\msys64\\ucrt64\\bin\\gdb.exe",
+            "miDebuggerPath": "gdb.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -51,7 +51,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/G++: gcc.exe build active file"
+            "preLaunchTask": "C/G++: g++.exe build active file"
         }
     ]
 }
